@@ -172,12 +172,14 @@ function parseMenus(html, source) {
       continue;
     }
 
-    // ── Dish (list item) ──────────────────────────────────────────────
-    if (type === 'item' && value.length > 3) {
-      // Don't add if already marked closed
-      if (weeks[currentWeek][currentDay][0] !== 'STÄNGT') {
-        weeks[currentWeek][currentDay].push(value);
-      }
+    // ── Dish (list item eller fritext) ───────────────────────────────
+    // Helgmenyn på Guldkornet skrivs som fritext (ej punktlista).
+    const META = /^(vi serverar|vår potatis|med reservation|telefon|e-post|sidan uppdaterad|hjälpte)/;
+    const isDish = type === 'item' ||
+      (type === 'text' && value.length > 10 && !META.test(lc));
+
+    if (isDish && weeks[currentWeek][currentDay][0] !== 'STÄNGT') {
+      weeks[currentWeek][currentDay].push(value);
     }
   }
 
