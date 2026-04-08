@@ -278,14 +278,24 @@ function getTodayISO() {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
+const _weekDaysCache = {};
 function getWeekDays(weekNum) {
-  const year = new Date().getFullYear();
+  if (_weekDaysCache[weekNum]) return _weekDaysCache[weekNum];
+
+  // Determine the correct year: the ISO year that owns this week.
+  // Try current year first; if the week's Thursday falls in a different
+  // calendar year, adjust.
+  let year = new Date().getFullYear();
+  const currentMonth = new Date().getMonth();
+  if (weekNum >= 52 && currentMonth === 0) year--;   // Jan showing week 52/53 → previous year
+  if (weekNum <= 2  && currentMonth === 11) year++;   // Dec showing week 1/2  → next year
+
   const jan4  = new Date(year, 0, 4);
   const dow   = jan4.getDay() || 7;                          // Mon=1 … Sun=7
   const monday = new Date(jan4);
   monday.setDate(jan4.getDate() - dow + 1 + (weekNum - 1) * 7);
 
-  return ['mon','tue','wed','thu','fri','sat','sun'].map((key, i) => {
+  const result = ['mon','tue','wed','thu','fri','sat','sun'].map((key, i) => {
     const d = new Date(monday);
     d.setDate(monday.getDate() + i);
     const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -296,6 +306,9 @@ function getWeekDays(weekNum) {
       isoDate: iso,
     };
   });
+
+  _weekDaysCache[weekNum] = result;
+  return result;
 }
 
 // ── DISH ICON ─────────────────────────────────────────────────────────────────
@@ -388,8 +401,8 @@ function buildCard(name, location, hours, dishes, source, showHours) {
     <div class="restaurant-card">
       <div class="card-header">
         <div>
-          <div class="restaurant-name">${name}</div>
-          <div class="restaurant-meta">${location} · ${hours}</div>
+          <div class="restaurant-name">${escHtml(name)}</div>
+          <div class="restaurant-meta">${escHtml(location)} · ${escHtml(hours)}</div>
         </div>
         <span class="badge ${effectivelyClosed ? 'badge-closed' : 'badge-open'}">
           ${effectivelyClosed ? 'Stängt' : 'Öppet'}
@@ -399,7 +412,7 @@ function buildCard(name, location, hours, dishes, source, showHours) {
       ${hoursHtml}
       <div class="source-bar">
         <span>Region Värmland</span>
-        <a href="${source}" target="_blank" rel="noopener">Källa ↗</a>
+        <a href="${escHtml(source)}" target="_blank" rel="noopener">Källa ↗</a>
       </div>
     </div>
   `;

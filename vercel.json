@@ -1,6 +1,3 @@
 {
-  "version": 2,
-  "rewrites": [
-    { "source": "/api/menu", "destination": "/api/menu" }
-  ]
+  "version": 2
 }
