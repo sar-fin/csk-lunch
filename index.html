@@ -370,7 +370,7 @@ function renderDay() {
     <div class="restaurant-grid">
       ${buildCard('Solsidan', 'Röda gatan D', 'mån–fre 11:15–13:30', sol,
           'https://www.regionvarmland.se/regionvarmland/halsa--vard/mat-och-restaurang', false)}
-      ${buildCard('Guldkornet', 'Patienthotellet', 'mån–fre 11:30–14:00', gul,
+      ${buildCard('Guldkornet', 'Patienthotellet', ['sat','sun'].includes(activeDay) ? 'lör–sön 11:30–13:30' : 'mån–fre 11:30–14:00', gul,
           'https://www.regionvarmland.se/regionvarmland/halsa--vard/patienthotell/guldkornet-kok-och-kafe', true)}
     </div>
   `;
@@ -496,3 +496,4 @@ loadMenu();
 </script>
 </body>
 </html>
+
